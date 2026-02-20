@@ -1,0 +1,658 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calculadora de Collar para Poste Troncocónico</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f6f8;
+      --surface: #ffffff;
+      --surface-2: #eef2f7;
+      --text: #1e293b;
+      --muted: #475569;
+      --accent: #0f5cc0;
+      --accent-2: #0c8f70;
+      --warn: #b45309;
+      --danger: #b91c1c;
+      --ok: #166534;
+      --line: #cbd5e1;
+      --shadow: 0 8px 24px rgba(15, 23, 42, 0.12);
+    }
+
+    body.dark {
+      --bg: #0b1220;
+      --surface: #111b2e;
+      --surface-2: #15233a;
+      --text: #e2e8f0;
+      --muted: #94a3b8;
+      --accent: #60a5fa;
+      --accent-2: #34d399;
+      --warn: #f59e0b;
+      --danger: #f87171;
+      --ok: #22c55e;
+      --line: #334155;
+      --shadow: 0 10px 28px rgba(2, 6, 23, 0.45);
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+    }
+
+    .app {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 20px;
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1fr;
+    }
+
+    .header {
+      background: linear-gradient(130deg, var(--surface), var(--surface-2));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px 18px;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .title h1 {
+      margin: 0;
+      font-size: 1.2rem;
+      letter-spacing: 0.4px;
+    }
+
+    .title p {
+      margin: 4px 0 0;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .toggle {
+      border: 1px solid var(--line);
+      background: var(--surface);
+      color: var(--text);
+      padding: 8px 12px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .main {
+      display: grid;
+      gap: 20px;
+      grid-template-columns: 1.1fr 1fr;
+    }
+
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    .card h2 {
+      margin: 0 0 14px;
+      font-size: 1rem;
+    }
+
+    .field {
+      display: grid;
+      gap: 6px;
+      margin-bottom: 14px;
+    }
+
+    label { font-weight: 600; font-size: 0.92rem; }
+
+    select,
+    input[type="number"],
+    input[type="range"],
+    textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 8px;
+      padding: 9px 10px;
+      font-size: 0.95rem;
+    }
+
+    .height-grid {
+      display: grid;
+      grid-template-columns: 110px 1fr;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .info-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 10px;
+    }
+
+    .chip {
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      padding: 8px;
+      background: var(--surface-2);
+      font-size: 0.86rem;
+      color: var(--muted);
+    }
+
+    .chip strong {
+      color: var(--text);
+      display: block;
+      font-size: 1rem;
+      margin-top: 2px;
+    }
+
+    .result {
+      margin-top: 8px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 14px;
+      background: linear-gradient(140deg, var(--surface-2), var(--surface));
+    }
+
+    .result-main {
+      font-size: clamp(1.6rem, 4vw, 2.35rem);
+      font-weight: 800;
+      color: var(--accent);
+      line-height: 1.1;
+    }
+
+    .result-sub {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.95rem;
+      display: grid;
+      gap: 3px;
+    }
+
+    .warnings {
+      margin-top: 12px;
+      display: grid;
+      gap: 8px;
+    }
+
+    .warning {
+      border-left: 4px solid var(--warn);
+      background: color-mix(in srgb, var(--warn) 15%, transparent);
+      padding: 8px 10px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.9rem;
+    }
+
+    .warning.danger {
+      border-left-color: var(--danger);
+      background: color-mix(in srgb, var(--danger) 12%, transparent);
+    }
+
+    .buttons {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    button.action {
+      border: 1px solid var(--line);
+      background: var(--surface-2);
+      color: var(--text);
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      padding: 10px 8px;
+      font-size: 0.87rem;
+    }
+
+    .svg-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: hidden;
+      background: repeating-linear-gradient(
+          0deg,
+          color-mix(in srgb, var(--surface-2) 90%, transparent),
+          color-mix(in srgb, var(--surface-2) 90%, transparent) 24px,
+          transparent 24px,
+          transparent 48px
+      );
+    }
+
+    .legend {
+      margin-top: 8px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+    }
+
+    .dot {
+      display: inline-flex;
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: middle;
+    }
+
+    @media (max-width: 960px) {
+      .main { grid-template-columns: 1fr; }
+      .buttons { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <header class="header">
+      <div class="title">
+        <h1>Calculadora Técnica de Collar para Poste Troncocónico</h1>
+        <p>Dimensionamiento geométrico exacto con selección comercial inmediata superior.</p>
+      </div>
+      <button class="toggle" id="themeBtn" type="button">Modo oscuro</button>
+    </header>
+
+    <main class="main">
+      <section class="card">
+        <h2>Parámetros de cálculo</h2>
+
+        <div class="field">
+          <label for="model">Modelo de poste</label>
+          <select id="model"></select>
+        </div>
+
+        <div class="field">
+          <label for="conicity">Conicidad C (mm/m)</label>
+          <select id="conicity">
+            <option value="20" selected>20 mm/m (default)</option>
+            <option value="15">15 mm/m</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label for="height">Altura desde el suelo h (m)</label>
+          <div class="height-grid">
+            <input id="height" type="number" min="0" step="0.01" />
+            <input id="heightRange" type="range" min="0" step="0.01" />
+          </div>
+        </div>
+
+        <div class="info-grid" id="geomInfo"></div>
+
+        <div class="result">
+          <div class="result-main" id="recommended">—</div>
+          <div class="result-sub" id="resultText"></div>
+          <div class="warnings" id="warnings"></div>
+        </div>
+
+        <div class="buttons">
+          <button class="action" id="copyBtn" type="button">Copiar resultado</button>
+          <button class="action" id="exportBtn" type="button">Exportar texto técnico</button>
+          <button class="action" id="printBtn" type="button">Imprimir reporte</button>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>Esquema dinámico del poste y collar</h2>
+        <div class="svg-wrap">
+          <svg id="poleSvg" viewBox="0 0 520 620" width="100%" height="100%" aria-label="Diagrama de poste">
+            <defs>
+              <marker id="arrow" markerWidth="8" markerHeight="8" refX="5" refY="3.5" orient="auto">
+                <polygon points="0 0, 7 3.5, 0 7" fill="currentColor"></polygon>
+              </marker>
+            </defs>
+
+            <!-- Línea de suelo -->
+            <line id="groundLine" x1="40" y1="500" x2="480" y2="500" stroke="#8b5a2b" stroke-width="3"></line>
+            <text x="44" y="492" fill="currentColor" font-size="13">Suelo</text>
+
+            <!-- Poste troncocónico -->
+            <polygon id="poleAbove" points="" fill="#9aa4b2" opacity="0.9"></polygon>
+            <polygon id="poleEmbedded" points="" fill="#64748b" opacity="0.95"></polygon>
+
+            <!-- Collar -->
+            <ellipse id="collarOuter" cx="260" cy="0" rx="50" ry="10" fill="none" stroke="#0f5cc0" stroke-width="4"></ellipse>
+            <ellipse id="collarInner" cx="260" cy="0" rx="38" ry="7" fill="none" stroke="#34d399" stroke-width="3"></ellipse>
+
+            <!-- Cota vertical -->
+            <line id="dimV" x1="430" y1="500" x2="430" y2="260" stroke="currentColor" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+            <text id="dimVText" x="438" y="380" fill="currentColor" font-size="13">h = 0.00 m</text>
+
+            <!-- Cota horizontal -->
+            <line id="dimH" x1="0" y1="0" x2="0" y2="0" stroke="currentColor" stroke-width="2" marker-start="url(#arrow)" marker-end="url(#arrow)"></line>
+            <text id="dimHText" x="0" y="0" fill="currentColor" font-size="13">Dcom = — mm</text>
+
+            <text id="noteTop" x="40" y="28" fill="currentColor" font-size="13">Cima</text>
+            <text id="noteBase" x="40" y="585" fill="currentColor" font-size="13">Base (empotramiento)</text>
+          </svg>
+        </div>
+        <div class="legend">
+          <span><span class="dot" style="background:#9aa4b2"></span>Poste útil</span>
+          <span><span class="dot" style="background:#64748b"></span>Zona empotrada</span>
+          <span><span class="dot" style="background:#0f5cc0"></span>Collar comercial</span>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <script>
+    // Datos técnicos de modelos
+    const MODELS = [
+      { id: "9r400", L: 9, Dc: 140 },
+      { id: "9r1200", L: 9, Dc: 190 },
+      { id: "11r1200", L: 11, Dc: 190 },
+      { id: "12r900", L: 12, Dc: 190 },
+      { id: "12r1200", L: 12, Dc: 190 },
+      { id: "15r1500", L: 15, Dc: 230 }
+    ];
+
+    // Lista oficial de diámetros comerciales
+    const COMMERCIAL_DIAMETERS = [75, 80, 90, 115, 140, 160, 180, 210, 240, 280, 320, 360, 400, 440];
+
+    const modelEl = document.getElementById("model");
+    const conicityEl = document.getElementById("conicity");
+    const heightEl = document.getElementById("height");
+    const heightRangeEl = document.getElementById("heightRange");
+    const geomInfoEl = document.getElementById("geomInfo");
+    const recommendedEl = document.getElementById("recommended");
+    const resultTextEl = document.getElementById("resultText");
+    const warningsEl = document.getElementById("warnings");
+    const themeBtn = document.getElementById("themeBtn");
+
+    const poleAbove = document.getElementById("poleAbove");
+    const poleEmbedded = document.getElementById("poleEmbedded");
+    const collarOuter = document.getElementById("collarOuter");
+    const collarInner = document.getElementById("collarInner");
+    const dimV = document.getElementById("dimV");
+    const dimVText = document.getElementById("dimVText");
+    const dimH = document.getElementById("dimH");
+    const dimHText = document.getElementById("dimHText");
+
+    // Inicialización de modelos
+    MODELS.forEach((m) => {
+      const opt = document.createElement("option");
+      opt.value = m.id;
+      opt.textContent = `${m.id} · L=${m.L}m · Dc=${m.Dc}mm`;
+      modelEl.appendChild(opt);
+    });
+
+    // Persistencia de tema
+    const storedTheme = localStorage.getItem("theme");
+    if (storedTheme === "dark") {
+      document.body.classList.add("dark");
+      themeBtn.textContent = "Modo claro";
+    }
+
+    themeBtn.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      const dark = document.body.classList.contains("dark");
+      themeBtn.textContent = dark ? "Modo claro" : "Modo oscuro";
+      localStorage.setItem("theme", dark ? "dark" : "light");
+    });
+
+    function getCurrentModel() {
+      return MODELS.find((m) => m.id === modelEl.value) || MODELS[0];
+    }
+
+    // Calcula diámetro comercial inmediato superior
+    function getCommercialDiameter(dcalc) {
+      return COMMERCIAL_DIAMETERS.find((d) => d >= dcalc) || null;
+    }
+
+    function clamp(n, min, max) {
+      return Math.min(max, Math.max(min, n));
+    }
+
+    function setHeightBounds() {
+      const { L } = getCurrentModel();
+      const L1 = (L / 10) + 0.6;
+      const Hu = L - L1;
+      heightEl.min = "0";
+      heightEl.max = Hu.toFixed(2);
+      heightRangeEl.min = "0";
+      heightRangeEl.max = Hu.toFixed(2);
+
+      if (!heightEl.value) {
+        const start = Math.max(0.2, Hu * 0.6);
+        heightEl.value = start.toFixed(2);
+      }
+
+      const bounded = clamp(parseFloat(heightEl.value) || 0, 0, Hu);
+      heightEl.value = bounded.toFixed(2);
+      heightRangeEl.value = bounded.toFixed(2);
+    }
+
+    // Dibujo SVG técnico dinámico
+    function renderSvg({ L, L1, Hu, h, Dc, C, dcalc, dcom }) {
+      const x = L - h;
+      const Dbase = Dc + (C * L);
+      const topY = 40;
+      const groundY = 500;
+      const baseY = 580;
+      const centerX = 260;
+
+      const mmToPx = 0.34;
+      const halfTop = (Dc * mmToPx) / 2;
+      const halfGround = ((Dc + C * Hu) * mmToPx) / 2;
+      const halfBase = (Dbase * mmToPx) / 2;
+
+      // Trapecio parte útil
+      const abovePoints = [
+        `${centerX - halfTop},${topY}`,
+        `${centerX + halfTop},${topY}`,
+        `${centerX + halfGround},${groundY}`,
+        `${centerX - halfGround},${groundY}`
+      ].join(" ");
+
+      // Trapecio zona empotrada
+      const embeddedPoints = [
+        `${centerX - halfGround},${groundY}`,
+        `${centerX + halfGround},${groundY}`,
+        `${centerX + halfBase},${baseY}`,
+        `${centerX - halfBase},${baseY}`
+      ].join(" ");
+
+      poleAbove.setAttribute("points", abovePoints);
+      poleEmbedded.setAttribute("points", embeddedPoints);
+
+      // Posición del collar desde el suelo
+      const collarY = groundY - ((h / Hu) * (groundY - topY));
+      const localDiameter = dcom || dcalc;
+      const collarRx = Math.max(14, (localDiameter * mmToPx) / 2 + 8);
+      const collarInnerRx = Math.max(10, collarRx - 12);
+
+      collarOuter.setAttribute("cy", collarY.toFixed(2));
+      collarInner.setAttribute("cy", collarY.toFixed(2));
+      collarOuter.setAttribute("rx", collarRx.toFixed(2));
+      collarInner.setAttribute("rx", collarInnerRx.toFixed(2));
+      collarOuter.setAttribute("stroke", dcom ? "#0f5cc0" : "#b91c1c");
+
+      // Cota vertical h
+      dimV.setAttribute("y1", groundY);
+      dimV.setAttribute("y2", collarY.toFixed(2));
+      dimVText.setAttribute("y", ((groundY + collarY) / 2).toFixed(2));
+      dimVText.textContent = `h = ${h.toFixed(2)} m`;
+
+      // Cota horizontal de diámetro comercial
+      const yH = collarY + 34;
+      const x1 = centerX - collarRx;
+      const x2 = centerX + collarRx;
+      dimH.setAttribute("x1", x1.toFixed(2));
+      dimH.setAttribute("x2", x2.toFixed(2));
+      dimH.setAttribute("y1", yH.toFixed(2));
+      dimH.setAttribute("y2", yH.toFixed(2));
+      dimHText.setAttribute("x", (x2 + 10).toFixed(2));
+      dimHText.setAttribute("y", (yH - 5).toFixed(2));
+      dimHText.textContent = `Dcom = ${dcom ? dcom.toFixed(0) : "N/A"} mm`;
+    }
+
+    function buildReport(data) {
+      const { model, L, L1, Hu, h, x, Dc, C, dcalc, dcom, diff, warnings } = data;
+      const lines = [
+        "REPORTE TÉCNICO - CÁLCULO DE COLLAR",
+        "------------------------------------",
+        `Modelo: ${model}`,
+        `Longitud total L: ${L.toFixed(2)} m`,
+        `Empotramiento L1 = (L/10)+0.6: ${L1.toFixed(2)} m`,
+        `Altura útil Hu = L-L1: ${Hu.toFixed(2)} m`,
+        `Altura desde suelo h: ${h.toFixed(2)} m`,
+        `Distancia desde la cima x = L-h: ${x.toFixed(2)} m`,
+        `Dc (cima): ${Dc.toFixed(0)} mm`,
+        `Conicidad C: ${C.toFixed(0)} mm/m`,
+        `Dcalc = Dc + (C*x): ${dcalc.toFixed(2)} mm`,
+        dcom ? `Diámetro comercial recomendado: ${dcom.toFixed(0)} mm` : "Diámetro comercial recomendado: NO DISPONIBLE",
+        dcom ? `Diferencia de ajuste (Dcom - Dcalc): ${diff.toFixed(2)} mm` : "Diferencia de ajuste: N/A"
+      ];
+      if (warnings.length) {
+        lines.push("\nAdvertencias:");
+        warnings.forEach((w) => lines.push(`- ${w}`));
+      }
+      return lines.join("\n");
+    }
+
+    function update() {
+      const model = getCurrentModel();
+      const L = model.L;
+      const Dc = model.Dc;
+      const C = parseFloat(conicityEl.value);
+
+      const L1 = (L / 10) + 0.6;
+      const Hu = L - L1;
+
+      let h = parseFloat(heightEl.value);
+      if (Number.isNaN(h)) h = 0;
+
+      const warnings = [];
+      if (h < 0) {
+        h = 0;
+        warnings.push("La altura no puede ser negativa. Se ajustó a 0 m.");
+      }
+      if (h > Hu) {
+        h = Hu;
+        warnings.push("La altura no puede superar la altura útil. Se ajustó al máximo permitido.");
+      }
+
+      const x = L - h;
+      const dcalc = Dc + (C * x);
+      const dcom = getCommercialDiameter(dcalc);
+      const diff = dcom ? dcom - dcalc : NaN;
+
+      if ((L - x) > (Hu - 0.2)) {
+        warnings.push("Punto de instalación a menos de 200 mm de la cima útil.");
+      }
+      if (dcalc > 440) {
+        warnings.push("No existe collar comercial disponible para este diámetro.");
+      }
+
+      heightEl.value = h.toFixed(2);
+      heightRangeEl.value = h.toFixed(2);
+
+      geomInfoEl.innerHTML = `
+        <div class="chip">Longitud total L<strong>${L.toFixed(2)} m</strong></div>
+        <div class="chip">Empotramiento L1<strong>${L1.toFixed(2)} m</strong></div>
+        <div class="chip">Altura útil Hu<strong>${Hu.toFixed(2)} m</strong></div>
+        <div class="chip">Distancia cima x<strong>${x.toFixed(2)} m</strong></div>
+      `;
+
+      if (dcom) {
+        recommendedEl.textContent = `Ø ${dcom.toFixed(0)} mm`;
+      } else {
+        recommendedEl.textContent = "Sin diámetro comercial";
+      }
+
+      resultTextEl.innerHTML = `
+        <span>Dcalc exacto: <strong>${dcalc.toFixed(2)} mm</strong></span>
+        <span>Diámetro comercial recomendado: <strong>${dcom ? `${dcom.toFixed(0)} mm` : "No disponible"}</strong></span>
+        <span>Diferencia de ajuste: <strong>${dcom ? `${diff.toFixed(2)} mm` : "N/A"}</strong></span>
+      `;
+
+      warningsEl.innerHTML = "";
+      warnings.forEach((w) => {
+        const div = document.createElement("div");
+        div.className = "warning" + (w.includes("No existe") ? " danger" : "");
+        div.textContent = w;
+        warningsEl.appendChild(div);
+      });
+
+      renderSvg({ L, L1, Hu, h, Dc, C, dcalc, dcom });
+
+      const report = buildReport({
+        model: model.id,
+        L,
+        L1,
+        Hu,
+        h,
+        x,
+        Dc,
+        C,
+        dcalc,
+        dcom,
+        diff,
+        warnings
+      });
+
+      document.getElementById("copyBtn").onclick = async () => {
+        try {
+          await navigator.clipboard.writeText(report);
+          alert("Resultado copiado al portapapeles.");
+        } catch {
+          alert("No se pudo copiar automáticamente. Selecciona y copia manualmente.");
+        }
+      };
+
+      document.getElementById("exportBtn").onclick = () => {
+        const blob = new Blob([report], { type: "text/plain;charset=utf-8" });
+        const a = document.createElement("a");
+        a.href = URL.createObjectURL(blob);
+        a.download = `reporte_collar_${model.id}.txt`;
+        a.click();
+        URL.revokeObjectURL(a.href);
+      };
+
+      document.getElementById("printBtn").onclick = () => {
+        const win = window.open("", "_blank", "width=850,height=700");
+        if (!win) return;
+        win.document.write(`
+          <pre style="font:14px/1.5 Consolas,monospace;white-space:pre-wrap;padding:24px;">${report}</pre>
+          <script>window.print();<\/script>
+        `);
+        win.document.close();
+      };
+    }
+
+    modelEl.addEventListener("change", () => {
+      setHeightBounds();
+      update();
+    });
+
+    conicityEl.addEventListener("change", update);
+
+    heightEl.addEventListener("input", () => {
+      heightRangeEl.value = heightEl.value;
+      update();
+    });
+
+    heightRangeEl.addEventListener("input", () => {
+      heightEl.value = heightRangeEl.value;
+      update();
+    });
+
+    modelEl.value = MODELS[0].id;
+    setHeightBounds();
+    update();
+  </script>
+</body>
+</html>
